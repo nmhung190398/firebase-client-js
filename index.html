@@ -1,0 +1,122 @@
+<html>
+  <head>
+    <title>Look24 :: Cloud Messaging Notification</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase.js"></script>
+    <!-- <link rel="manifest" href="manifest.json"> -->
+
+    <script>
+      // Initialize Firebase
+      //my config
+      var config = {
+        apiKey: "AIzaSyBM3S4AwuNrXcERoEM5m30EQ0QXgX7XGOE",
+        authDomain: "test-fire-base-f66d1.firebaseapp.com",
+        databaseURL: "https://test-fire-base-f66d1-default-rtdb.firebaseio.com",
+        projectId: "test-fire-base-f66d1",
+        storageBucket: "test-fire-base-f66d1.appspot.com",
+        messagingSenderId: "905974582317",
+        appId: "1:905974582317:web:77807e15c97c181baafca4",
+        measurementId: "G-CZL8Q1NK4P",
+      };
+
+      //evotek config
+      // var config = {
+      //   apiKey: "AIzaSyDkFq1sTKjpOY-0Qa6mHkIS1arxKLRppbg",
+      //   authDomain: "technopart-evotek.firebaseapp.com",
+      //   projectId: "technopart-evotek",
+      //   storageBucket: "technopart-evotek.appspot.com",
+      //   messagingSenderId: "96963791978",
+      //   appId: "1:96963791978:web:2450899d8c1f96121fce13",
+      //   measurementId: "G-N9Y3HCFMR8",
+      // };
+
+      firebase.initializeApp(config);
+    </script>
+
+    <script>
+      // Retrieve Firebase Messaging object.
+      const messaging = firebase.messaging();
+      messaging
+        .requestPermission()
+        .then(function () {
+          console.log("Notification permission granted.");
+          if (isTokenSentToServer()) {
+            console.log("Token already sent to server");
+          } else {
+            //get fcm token
+            registerToken();
+          }
+          registerToken();
+        })
+        .catch(function (err) {
+          console.log("Unable to get permission to notify.", err);
+        });
+
+      function registerServer(currentToken) {}
+
+      function subTopic(topic, token) {
+        axios({
+          method: "post",
+          url: "/login",
+          data: {
+            user: "test",
+            lastName: "test1",
+          },
+        });
+      }
+      // Registered
+      function registerToken() {
+        messaging
+          .getToken()
+          .then(function (currentToken) {
+            if (currentToken) {
+              console.log(currentToken);
+              registerServer(currentToken);
+              setTokenSentToServer(true);
+            } else {
+              // Show permission request.
+              //console.log('No Instance ID token available. Request permission to generate one.');
+              setTokenSentToServer(false);
+            }
+          })
+          .catch(function (err) {
+            console.log("An error occurred while retrieving token. ", err);
+            showToken("Error retrieving Instance ID token. ", err);
+            setTokenSentToServer(false);
+          });
+      }
+
+      function setTokenSentToServer(sent) {
+        window.localStorage.setItem("sentToServer", sent ? "1" : "0");
+      }
+
+      function isTokenSentToServer() {
+        return window.localStorage.getItem("sentToServer") === "1";
+      }
+
+      function showToken(currentToken) {
+        var tokenElement = document.querySelector("#token");
+        //tokenElement.textContent = currentToken;
+      }
+
+      // ForeGround
+      messaging.onMessage(function (payLoad) {
+        console.log("Message Received");
+        console.log(payLoad);
+        notificationOptions = {
+          body: payLoad.data.content,
+          icon: "fa fa-home",
+        };
+        notificationTitle = payLoad.data.title;
+        var notification = new Notification(
+          notificationTitle,
+          notificationOptions
+        );
+      });
+    </script>
+  </head>
+
+  <body>
+    Look24 :: Cloud Messaging Notification
+  </body>
+</html>
